@@ -3,8 +3,11 @@ Authentic Vision / Meta Anchor attestation tools
 
 
 ## Getting started
+- Create new or add to NodeJS project (Typescript or Javascript)
+- Install package via `npm i @authenticvision/attestation`
+- Hack away from one of the boilerplates below
 
-### In Production
+### Boilerplate Production
 ```
 import { AttestationManager } from '@authenticvision/attestation';
 
@@ -20,13 +23,13 @@ if(token) {
         
         if(attestation.isAuthenticated()) {
             console.log(`Authenticated attestation received. It's safe to unlock value for slid=${slid}`)
-            } else {        
+        } else {
             if(attestation.isFraud()) {
                 console.log(`FRAUD detected for ${slid} - handle it!`);
             } else {
                 // Its not fraud, and the label can be identified. Some "ungated" information could be displayed
                 console.log(`A SLID is known, but not authenticated. You may display public information for slid=${slid}`)
-            }        
+            }
         }
     } catch(e) {
         // Key not found, token expired, already redeemed before, .... 
@@ -35,7 +38,7 @@ if(token) {
 }
 ```
 
-### For local development:
+### Boilerplate local development:
 - Request an API-Key at XXXX
 - Use https://api.metaanchor.io/api/v1/attestation/dev/generate to generate development-attestations
 - Set `mgr.setDevelopment(true)` to enable the development-keyserver. Make sure to not use this line in production!
@@ -59,13 +62,13 @@ if(token) {
         
         if(attestation.isAuthenticated()) {
             console.log(`Authenticated attestation received. It's safe to unlock value for slid=${slid}`)
-            } else {        
+        } else {
             if(attestation.isFraud()) {
                 console.log(`FRAUD detected for ${slid} - handle it!`);
             } else {
                 // Its not fraud, and the label can be identified. Some "ungated" information could be displayed
                 console.log(`A SLID is known, but not authenticated. You may display public information for slid=${slid}`)
-            }        
+            }
         }
     } catch(e) {
         // Key not found, token expired, already redeemed before, .... 
