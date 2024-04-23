@@ -29,7 +29,7 @@ describe('Decoding tests', () => {
     // Should have .errorCode() with UKNOWN_KEY, EXPIRED, ALREADY_REDEEMED, DECODE_FAILURE, KEYSERVER_UNREACHABLE etc etc.
   });
 
-  it('Decodes expired token, when expiry is ignroed', async () => {
+  it('Decodes expired token, when expiry is ignored', async () => {
     const attestation = await mgr.decode(testTokenExpired, {ignoreExpiry:true});
     expect(attestation?.getSlid()).toEqual("Z45JBJR6S9");
   });
@@ -59,5 +59,19 @@ describe('Basic usage', () => {
     expect(attestation?.isAuthenticated()).toEqual(false);
     expect(attestation?.isFraud()).toEqual(true);
     expect(attestation?.getSlid()).toEqual("Z45JBJR6S9");
-  });  
+  });
+
+  it('Tokens can only be decoded once', async () => {
+    const attestation = await mgr.decode(testTokenAuthentic);
+    await expect(mgr.decode(testTokenAuthentic, {noRedeem: true})).rejects.toThrow(AttestationError);
+    await expect(mgr.decode(testTokenAuthentic)).rejects.toThrow(AttestationError);
+  });
+
+  it('Tokens can be decoded multiple times with flag', async () => {
+    const attestation = await mgr.decode(testTokenAuthentic, {noRedeem: true});
+    expect(attestation?.getSlid()).toEqual("Z45JBJR6S9");
+
+    const attestationRedecoded = await mgr.decode(testTokenAuthentic, {noRedeem: true});
+    expect(attestationRedecoded?.getSlid()).toEqual("Z45JBJR6S9");
+  });
 });
