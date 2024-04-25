@@ -151,8 +151,7 @@ class AttestationManager  {
   }
 
   private tokenRedemption(attestation: Attestation, params?: DecodeParameters) {
-    const hash = attestation.getPayload().jti;
-
+    const hash = attestation.getPayload().jti;    
     const redeemDate = this.redeemedCache.get<Date>(hash);
    
     if(redeemDate) {
@@ -208,6 +207,18 @@ class AttestationManager  {
       throw new AttestationError(error as Error);
     }
   }
+
+  /**
+   * Clears key- and redemption cache. Note clearing the redemption cache may
+   * pose a security issue as it opens vulnerabilities for replay attacks.
+   */
+  public clearCaches(): void {
+    this.keyCache.flushAll();
+    this.redeemedCache.flushAll();
+  } 
 }
 
-export {AttestationManager, Attestation, AttestationPayload, AttestationError};
+const attestationDecoder = new AttestationManager();
+
+// Do not export the Attestation Manager class on purpose to avoid mixups...
+export {attestationDecoder, AttestationManager, Attestation, AttestationPayload, AttestationError};

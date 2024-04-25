@@ -9,16 +9,15 @@ Authentic Vision / Meta Anchor attestation tools
 
 ### Boilerplate Production
 ```
-import { AttestationManager } from '@authenticvision/attestation';
+import { attestationDecoder } from '@authenticvision/attestation';
 
 // Typically, a GET-Parameter 'av_sip' is carrying the attestation token
 // We assume to have a NodeJS-Request object 'req' available.
 const token = req.query?.av_sip
 
 if(token) {
-    const mgr = new AttestationManager();
     try {
-        const attestation = await mgr.decode(token);
+        const attestation = await attestationDecoder.decode(token);
         const slid = attestation.getSlid(); // An attestation *always* has a SecureLabel-Identifier (SLID)
         
         if(attestation.isAuthenticated()) {
@@ -41,23 +40,23 @@ if(token) {
 ### Boilerplate local development:
 - Request an API-Key at XXXX
 - Use https://api.metaanchor.io/api/v1/attestation/dev/generate to generate development-attestations
-- Set `mgr.setDevelopment(true)` to enable the development-keyserver. Make sure to not use this line in production!
+- Set `attestationDecoder.setDevelopment(true)` to enable the development-keyserver. Make sure to not use this line in production!
 
 Complete example:
 
 ```
-import { AttestationManager } from '@authenticvision/attestation';
+import { attestationDecoder } from '@authenticvision/attestation';
+
+// SETUP
+attestationDecoder.activateDevelopmentMode() // FIXME DO NOT SHIP THIS LINE TO PRODUCTION
 
 // Typically, a GET-Parameter 'av_sip' is carrying the attestation token
 // We assume to have a NodeJS-Request object 'req' available.
 const token = "v4.public.eyJhdWQiOiJleGFtcGxlLmNvbSIsImV4cCI6IjIwMzAtMDEtMDFUMDA6MDA6MDBaIiwiaWF0IjoiMjAyMy0wNC0yMFQxNjo1NDowMVoiLCJqdGkiOiJmOGIxZDdmNzNiNzEzYWY0M2FkNTllMzNiN2MwMmRmNSIsInJlc3VsdCI6IkFVVEhFTlRJQyIsInNsaWQiOiJaNDVKQkpSNlM5IiwibG9jYXRpb24iOnsibGF0Ijo0Ny43OTQ2LCJsb24iOjEyLjk4NjR9LCJleHRyZWZzIjpbImZvbyIseyJiYXIiOiJiYXoifSwxMjNdffeoKRK7wfueWl9ti4h9JTYM2ZOXOPgHMOq-6eRxFEKFUYz1LLcNxUp9JtHHY-FD5pHxP9OQ9nOg_izxMwK3GgU.eyJraWQiOiAiazQucGlkLjJ1YWIzaDE4c2dhWVgxUEtGVzNPSU12R0lmQU1udXdXQko2VHVDYnV3UWlpIn0"
 
 if(token) {
-    const mgr = new AttestationManager();
-    mgr.activateDevelopmentMode() // FIXME DO NOT SHIP THIS LINE TO PRODUCTION
-    
     try {
-        const attestation = await mgr.decode(token);
+        const attestation = await attestationDecoder.decode(token);
         const slid = attestation.getSlid(); // An attestation *always* has a SecureLabel-Identifier (SLID)
         
         if(attestation.isAuthenticated()) {
