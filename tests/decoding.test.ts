@@ -28,7 +28,32 @@ describe('Decoding tests', () => {
   });
 
   it('Decodes expired token, when expiry is ignored', async () => {
-    const attestation = await attestationDecoder.decode(testTokenExpired, {ignoreExpiry:true});
+    const pasetoOptions = {ignoreExp:true}
+    const attestation = await attestationDecoder.decode(testTokenExpired, {}, pasetoOptions);
+    expect(attestation?.getSlid()).toEqual("Z45JBJR6S9");
+  });
+
+  it('Decodes token less than 5sec in future (default)', async () => {
+    // paseto-options allow to specify now
+    // Decode token is issued 2023-04-20T16:54:01Z
+    const pasetoOptions = {now: new Date("2023-04-20T16:54:01Z")}
+    const attestation = await attestationDecoder.decode(testToken, {}, pasetoOptions);
+    expect(attestation?.getSlid()).toEqual("Z45JBJR6S9");
+  });
+
+  it('Does not decode token more than 5sec in future (default)', async () => {
+    // paseto-options allow to specify now
+    // Decode token is issued 2023-04-20T16:54:01Z
+    const pasetoOptions = {now: new Date("2023-04-20T16:53:55Z")} // this is 6 seconds before issuing date
+    await expect(attestationDecoder.decode(testToken, {}, pasetoOptions)).rejects.toThrow(AttestationError);
+  });
+
+  it('Does decode token more than 5sec in future (configured)', async () => {
+    // paseto-options allow to specify now
+    // Decode token is issued 2023-04-20T16:54:01Z
+    // this is 6 seconds before issuing date, however, we also define 10s tolerance
+    const pasetoOptions = {now: new Date("2023-04-20T16:53:55Z"), clockTolerance: "10s"}
+    const attestation = await attestationDecoder.decode(testToken, {}, pasetoOptions);
     expect(attestation?.getSlid()).toEqual("Z45JBJR6S9");
   });
 });

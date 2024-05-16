@@ -1,4 +1,4 @@
-import { V4, errors } from 'paseto';
+import { ConsumeOptions, V4, errors } from 'paseto';
 import NodeCache from 'node-cache';
 
 /**
@@ -35,10 +35,6 @@ type AttestationPayload = {
  * Parameters to configure decoding options
  */
 interface DecodeParameters {
-  /**
-   * If true, ignores expiry date, i.e. allows to decode already expired tokens
-   */
-  ignoreExpiry?: boolean;
   /**
    * If true, token is decoded but not redeemed. 
    * This does not undo previous redemptions, so if a token is already redeemed, it will no longer be decode-able
@@ -122,6 +118,10 @@ class AttestationManager  {
   private keyServerUrl: string = "https://sip-keys.authenticvision.com/v4";
   // stores token.jti together with the redeem date
   private redeemedCache: NodeCache = new NodeCache();
+  private defaultPasetoOptions: ConsumeOptions<true> = {
+    clockTolerance: "5s",
+    complete: true
+  };
 
   constructor() {
 
@@ -184,7 +184,7 @@ class AttestationManager  {
    * @param params Optional Parameters, see docs
    * @returns Attestation, when successfully decoded. Throws otherwise
    */
-  public async decode(token: string, params?: DecodeParameters): Promise<Attestation> {
+  public async decode(token: string, params?: DecodeParameters, pasetoOptions?: ConsumeOptions<true> ): Promise<Attestation> {
     try {
       const parsedToken = JSON.parse(Buffer.from(token.split('.')[3], 'base64').toString('utf-8'));
 
@@ -196,7 +196,10 @@ class AttestationManager  {
       // For demo-purposes, decode it even if expired
       //const rawPayload = (await V4.verify(token, pubKey!, { ignoreExp: true, complete: true }))?.payload as AttestationTokenPayload;
       
-      const validatedPayload = await V4.verify(token, pubKey!, { ignoreExp: params?.ignoreExpiry, complete: true });
+      // Any provided pasetoOptions will overwrite the default options
+      const mergedOptions: ConsumeOptions<true> = Object.assign({}, this.defaultPasetoOptions, pasetoOptions);
+
+      const validatedPayload = await V4.verify(token, pubKey!, mergedOptions);
       const attestation = new Attestation(validatedPayload?.payload as AttestationPayload, token); 
       
       // Throws if key already redeemed
