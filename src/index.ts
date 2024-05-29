@@ -28,7 +28,17 @@ type AttestationPayload = {
    */
   extrefs: Array<object>;
 
-  // TODO location, gtin, exp, iat, aud, _v etc
+  /**
+   * Expiry date, see PASETO-docs for details.
+   */
+  exp: string;
+
+  /**
+   * Issuing date, see PASETO-docs for details
+   */
+  iat: string;
+
+  // TODO location, gtin, aud, _v etc
 }
 
 /**
@@ -104,7 +114,20 @@ class Attestation {
    */
   public getPayload(): AttestationPayload {
     return this.payload;
+  }
 
+  /**
+   * Provides time to expiry relative to a `from` time. Returns negative numbers if expired.
+   * @param from The reference time, Date.now() if not provided 
+   * @returns Seconds left until expiry in seconds.
+   */
+  public secondsToExpiry(from: string | Date = new Date()): number {
+    const expiration = new Date(this.payload.exp).getTime();
+    const fromTime = from ? new Date(from!).getTime() : Date.now();
+
+    const timeLeft: number = expiration - fromTime;
+
+    return timeLeft / 1000.0;
   }
 }
 

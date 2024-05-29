@@ -9,7 +9,7 @@
     "dist"
   ],
   "scripts": {
-    "test": "jest",
+    "test": "jest --verbose",
     "build": "tsup"
   },
   "repository": {
